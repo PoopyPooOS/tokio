@@ -908,9 +908,9 @@ impl std::os::unix::io::AsFd for File {
 
 #[cfg(unix)]
 impl std::os::unix::io::FromRawFd for File {
-    unsafe fn from_raw_fd(fd: std::os::unix::io::RawFd) -> Self {
+    unsafe fn from_raw_fd(fd: std::os::unix::io::RawFd) -> Self { unsafe {
         StdFile::from_raw_fd(fd).into()
-    }
+    }}
 }
 
 cfg_windows! {

@@ -1678,9 +1678,9 @@ unsafe impl linked_list::Link for Waiter {
         ptr
     }
 
-    unsafe fn pointers(target: NonNull<Waiter>) -> NonNull<linked_list::Pointers<Waiter>> {
+    unsafe fn pointers(target: NonNull<Waiter>) -> NonNull<linked_list::Pointers<Waiter>> { unsafe {
         Waiter::addr_of_pointers(target)
-    }
+    }}
 }
 
 impl<T> fmt::Debug for Sender<T> {

@@ -815,10 +815,10 @@ cfg_unix! {
         ///
         /// The caller is responsible for ensuring that the socket is in
         /// non-blocking mode.
-        unsafe fn from_raw_fd(fd: RawFd) -> TcpSocket {
+        unsafe fn from_raw_fd(fd: RawFd) -> TcpSocket { unsafe {
             let inner = socket2::Socket::from_raw_fd(fd);
             TcpSocket { inner }
-        }
+        }}
     }
 
     impl IntoRawFd for TcpSocket {

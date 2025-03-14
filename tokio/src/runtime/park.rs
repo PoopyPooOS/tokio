@@ -305,9 +305,9 @@ impl Inner {
         Arc::into_raw(this) as *const ()
     }
 
-    unsafe fn from_raw(ptr: *const ()) -> Arc<Inner> {
+    unsafe fn from_raw(ptr: *const ()) -> Arc<Inner> { unsafe {
         Arc::from_raw(ptr as *const Inner)
-    }
+    }}
 }
 
 unsafe fn unparker_to_raw_waker(unparker: Arc<Inner>) -> RawWaker {
@@ -317,24 +317,24 @@ unsafe fn unparker_to_raw_waker(unparker: Arc<Inner>) -> RawWaker {
     )
 }
 
-unsafe fn clone(raw: *const ()) -> RawWaker {
+unsafe fn clone(raw: *const ()) -> RawWaker { unsafe {
     Arc::increment_strong_count(raw as *const Inner);
     unparker_to_raw_waker(Inner::from_raw(raw))
-}
+}}
 
-unsafe fn drop_waker(raw: *const ()) {
+unsafe fn drop_waker(raw: *const ()) { unsafe {
     drop(Inner::from_raw(raw));
-}
+}}
 
-unsafe fn wake(raw: *const ()) {
+unsafe fn wake(raw: *const ()) { unsafe {
     let unparker = Inner::from_raw(raw);
     unparker.unpark();
-}
+}}
 
-unsafe fn wake_by_ref(raw: *const ()) {
+unsafe fn wake_by_ref(raw: *const ()) { unsafe {
     let raw = raw as *const Inner;
     (*raw).unpark();
-}
+}}
 
 #[cfg(loom)]
 pub(crate) fn current_thread_park_count() -> usize {

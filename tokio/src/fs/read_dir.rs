@@ -8,16 +8,16 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::sync::Arc;
-use std::task::{ready, Context, Poll};
+use std::task::{Context, Poll, ready};
 
 #[cfg(test)]
-use super::mocks::spawn_blocking;
-#[cfg(test)]
 use super::mocks::JoinHandle;
-#[cfg(not(test))]
-use crate::blocking::spawn_blocking;
+#[cfg(test)]
+use super::mocks::spawn_blocking;
 #[cfg(not(test))]
 use crate::blocking::JoinHandle;
+#[cfg(not(test))]
+use crate::blocking::spawn_blocking;
 
 const CHUNK_SIZE: usize = 32;
 
@@ -102,7 +102,7 @@ impl ReadDir {
         loop {
             match self.0 {
                 State::Idle(ref mut data) => {
-                    let (buf, _, ref remain) = data.as_mut().unwrap();
+                    let &mut (ref mut buf, _, ref remain) = data.as_mut().unwrap();
 
                     if let Some(ent) = buf.pop_front() {
                         return Poll::Ready(ent.map(Some));

@@ -89,7 +89,7 @@ impl Wheel {
     pub(crate) unsafe fn insert(
         &mut self,
         item: TimerHandle,
-    ) -> Result<u64, (TimerHandle, InsertError)> {
+    ) -> Result<u64, (TimerHandle, InsertError)> { unsafe {
         let when = item.sync_when();
 
         if when <= self.elapsed {
@@ -111,7 +111,7 @@ impl Wheel {
         });
 
         Ok(when)
-    }
+    }}
 
     /// Removes `item` from the timing wheel.
     pub(crate) unsafe fn remove(&mut self, item: NonNull<TimerShared>) {

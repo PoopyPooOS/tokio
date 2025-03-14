@@ -178,7 +178,7 @@ impl<T> Tx<T> {
         }
     }
 
-    pub(crate) unsafe fn reclaim_block(&self, mut block: NonNull<Block<T>>) {
+    pub(crate) unsafe fn reclaim_block(&self, mut block: NonNull<Block<T>>) { unsafe {
         // The block has been removed from the linked list and ownership
         // is reclaimed.
         //
@@ -217,7 +217,7 @@ impl<T> Tx<T> {
         if !reused {
             let _ = Box::from_raw(block.as_ptr());
         }
-    }
+    }}
 
     pub(crate) fn is_closed(&self) -> bool {
         let tail = self.block_tail.load(Acquire);
@@ -367,7 +367,7 @@ impl<T> Rx<T> {
 
     /// Effectively `Drop` all the blocks. Should only be called once, when
     /// the list is dropping.
-    pub(super) unsafe fn free_blocks(&mut self) {
+    pub(super) unsafe fn free_blocks(&mut self) { unsafe {
         debug_assert_ne!(self.free_head, NonNull::dangling());
 
         let mut cur = Some(self.free_head);
@@ -384,7 +384,7 @@ impl<T> Rx<T> {
             cur = block.as_ref().load_next(Relaxed);
             drop(Box::from_raw(block.as_ptr()));
         }
-    }
+    }}
 }
 
 impl<T> fmt::Debug for Rx<T> {

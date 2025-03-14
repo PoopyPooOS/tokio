@@ -197,7 +197,7 @@ impl<L: Link> LinkedList<L, L::Target> {
     /// - `node` is currently contained by some other `GuardedLinkedList` **and**
     ///   the caller has an exclusive access to that list. This condition is
     ///   used by the linked list in `sync::Notify`.
-    pub(crate) unsafe fn remove(&mut self, node: NonNull<L::Target>) -> Option<L::Handle> {
+    pub(crate) unsafe fn remove(&mut self, node: NonNull<L::Target>) -> Option<L::Handle> { unsafe {
         if let Some(prev) = L::pointers(node).as_ref().get_prev() {
             debug_assert_eq!(L::pointers(prev).as_ref().get_next(), Some(node));
             L::pointers(prev)
@@ -229,7 +229,7 @@ impl<L: Link> LinkedList<L, L::Target> {
         L::pointers(node).as_mut().set_prev(None);
 
         Some(L::from_raw(node))
-    }
+    }}
 }
 
 impl<L: Link> fmt::Debug for LinkedList<L, L::Target> {

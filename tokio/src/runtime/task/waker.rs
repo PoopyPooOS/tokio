@@ -64,34 +64,34 @@ cfg_not_trace! {
     }
 }
 
-unsafe fn clone_waker(ptr: *const ()) -> RawWaker {
+unsafe fn clone_waker(ptr: *const ()) -> RawWaker { unsafe {
     let header = NonNull::new_unchecked(ptr as *mut Header);
     trace!(header, "waker.clone");
     header.as_ref().state.ref_inc();
     raw_waker(header)
-}
+}}
 
-unsafe fn drop_waker(ptr: *const ()) {
+unsafe fn drop_waker(ptr: *const ()) { unsafe {
     let ptr = NonNull::new_unchecked(ptr as *mut Header);
     trace!(ptr, "waker.drop");
     let raw = RawTask::from_raw(ptr);
     raw.drop_reference();
-}
+}}
 
-unsafe fn wake_by_val(ptr: *const ()) {
+unsafe fn wake_by_val(ptr: *const ()) { unsafe {
     let ptr = NonNull::new_unchecked(ptr as *mut Header);
     trace!(ptr, "waker.wake");
     let raw = RawTask::from_raw(ptr);
     raw.wake_by_val();
-}
+}}
 
 // Wake without consuming the waker
-unsafe fn wake_by_ref(ptr: *const ()) {
+unsafe fn wake_by_ref(ptr: *const ()) { unsafe {
     let ptr = NonNull::new_unchecked(ptr as *mut Header);
     trace!(ptr, "waker.wake_by_ref");
     let raw = RawTask::from_raw(ptr);
     raw.wake_by_ref();
-}
+}}
 
 static WAKER_VTABLE: RawWakerVTable =
     RawWakerVTable::new(clone_waker, wake_by_val, wake_by_ref, drop_waker);

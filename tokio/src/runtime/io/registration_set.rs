@@ -114,13 +114,13 @@ impl RegistrationSet {
 
     // This function is marked as unsafe, because the caller must make sure that
     // `io` is part of the registration set.
-    pub(super) unsafe fn remove(&self, synced: &mut Synced, io: &Arc<ScheduledIo>) {
+    pub(super) unsafe fn remove(&self, synced: &mut Synced, io: &Arc<ScheduledIo>) { unsafe {
         // SAFETY: Pointers into an Arc are never null.
-        let io = unsafe { NonNull::new_unchecked(Arc::as_ptr(io).cast_mut()) };
+        let io = NonNull::new_unchecked(Arc::as_ptr(io).cast_mut());
 
         super::EXPOSE_IO.unexpose_provenance(io.as_ptr());
         let _ = synced.registrations.remove(io);
-    }
+    }}
 }
 
 // Safety: `Arc` pins the inner data
@@ -140,7 +140,7 @@ unsafe impl linked_list::Link for Arc<ScheduledIo> {
 
     unsafe fn pointers(
         target: NonNull<Self::Target>,
-    ) -> NonNull<linked_list::Pointers<ScheduledIo>> {
+    ) -> NonNull<linked_list::Pointers<ScheduledIo>> { unsafe {
         NonNull::new_unchecked(target.as_ref().linked_list_pointers.get())
-    }
+    }}
 }

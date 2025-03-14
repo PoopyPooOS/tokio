@@ -464,9 +464,9 @@ unsafe impl linked_list::Link for TimerShared {
 
     unsafe fn pointers(
         target: NonNull<Self::Target>,
-    ) -> NonNull<linked_list::Pointers<Self::Target>> {
+    ) -> NonNull<linked_list::Pointers<Self::Target>> { unsafe {
         TimerShared::addr_of_pointers(target)
-    }
+    }}
 }
 
 // ===== impl Entry =====
@@ -606,9 +606,9 @@ impl TimerHandle {
     ///
     /// SAFETY: The caller must ensure that the handle remains valid, the driver
     /// lock is held, and that the timer is not in any wheel linked lists.
-    pub(super) unsafe fn set_expiration(&self, tick: u64) {
+    pub(super) unsafe fn set_expiration(&self, tick: u64) { unsafe {
         self.inner.as_ref().set_expiration(tick);
-    }
+    }}
 
     /// Attempts to mark this entry as pending. If the expiration time is after
     /// `not_after`, however, returns an Err with the current expiration time.
@@ -619,7 +619,7 @@ impl TimerHandle {
     /// SAFETY: The caller must ensure that the handle remains valid, the driver
     /// lock is held, and that the timer is not in any wheel linked lists.
     /// After returning Ok, the entry must be added to the pending list.
-    pub(super) unsafe fn mark_pending(&self, not_after: u64) -> Result<(), u64> {
+    pub(super) unsafe fn mark_pending(&self, not_after: u64) -> Result<(), u64> { unsafe {
         match self.inner.as_ref().state.mark_pending(not_after) {
             Ok(()) => {
                 // mark this as being on the pending queue in cached_when
@@ -631,7 +631,7 @@ impl TimerHandle {
                 Err(tick)
             }
         }
-    }
+    }}
 
     /// Attempts to transition to a terminal state. If the state is already a
     /// terminal state, does nothing.
@@ -644,9 +644,9 @@ impl TimerHandle {
     ///
     /// SAFETY: The driver lock must be held while invoking this function, and
     /// the entry must not be in any wheel linked lists.
-    pub(super) unsafe fn fire(self, completed_state: TimerResult) -> Option<Waker> {
+    pub(super) unsafe fn fire(self, completed_state: TimerResult) -> Option<Waker> { unsafe {
         self.inner.as_ref().state.fire(completed_state)
-    }
+    }}
 }
 
 impl Drop for TimerEntry {

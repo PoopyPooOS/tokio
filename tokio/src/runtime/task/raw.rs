@@ -215,10 +215,10 @@ impl RawTask {
 
     /// Safety: `dst` must be a `*mut Poll<super::Result<T::Output>>` where `T`
     /// is the future stored by the task.
-    pub(super) unsafe fn try_read_output(self, dst: *mut (), waker: &Waker) {
+    pub(super) unsafe fn try_read_output(self, dst: *mut (), waker: &Waker) { unsafe {
         let vtable = self.header().vtable;
         (vtable.try_read_output)(self.ptr, dst, waker);
-    }
+    }}
 
     pub(super) fn drop_join_handle_slow(self) {
         let vtable = self.header().vtable;
@@ -247,66 +247,66 @@ impl RawTask {
     /// This is for usage by the injection queue
     ///
     /// Safety: make sure only one queue uses this and access is synchronized.
-    pub(crate) unsafe fn get_queue_next(self) -> Option<RawTask> {
+    pub(crate) unsafe fn get_queue_next(self) -> Option<RawTask> { unsafe {
         self.header()
             .queue_next
             .with(|ptr| *ptr)
             .map(|p| RawTask::from_raw(p))
-    }
+    }}
 
     /// Sets the queue-next pointer
     ///
     /// This is for usage by the injection queue
     ///
     /// Safety: make sure only one queue uses this and access is synchronized.
-    pub(crate) unsafe fn set_queue_next(self, val: Option<RawTask>) {
+    pub(crate) unsafe fn set_queue_next(self, val: Option<RawTask>) { unsafe {
         self.header().set_next(val.map(|task| task.ptr));
-    }
+    }}
 }
 
 impl Copy for RawTask {}
 
-unsafe fn poll<T: Future, S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn poll<T: Future, S: Schedule>(ptr: NonNull<Header>) { unsafe {
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.poll();
-}
+}}
 
-unsafe fn schedule<S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn schedule<S: Schedule>(ptr: NonNull<Header>) { unsafe {
     use crate::runtime::task::{Notified, Task};
 
     let scheduler = Header::get_scheduler::<S>(ptr);
     scheduler
         .as_ref()
         .schedule(Notified(Task::from_raw(ptr.cast())));
-}
+}}
 
-unsafe fn dealloc<T: Future, S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn dealloc<T: Future, S: Schedule>(ptr: NonNull<Header>) { unsafe {
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.dealloc();
-}
+}}
 
 unsafe fn try_read_output<T: Future, S: Schedule>(
     ptr: NonNull<Header>,
     dst: *mut (),
     waker: &Waker,
-) {
+) { unsafe {
     let out = &mut *(dst as *mut Poll<super::Result<T::Output>>);
 
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.try_read_output(out, waker);
-}
+}}
 
-unsafe fn drop_join_handle_slow<T: Future, S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn drop_join_handle_slow<T: Future, S: Schedule>(ptr: NonNull<Header>) { unsafe {
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.drop_join_handle_slow();
-}
+}}
 
-unsafe fn drop_abort_handle<T: Future, S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn drop_abort_handle<T: Future, S: Schedule>(ptr: NonNull<Header>) { unsafe {
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.drop_reference();
-}
+}}
 
-unsafe fn shutdown<T: Future, S: Schedule>(ptr: NonNull<Header>) {
+unsafe fn shutdown<T: Future, S: Schedule>(ptr: NonNull<Header>) { unsafe {
     let harness = Harness::<T, S>::from_raw(ptr);
     harness.shutdown();
-}
+}}

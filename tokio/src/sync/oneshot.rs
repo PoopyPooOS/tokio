@@ -404,33 +404,33 @@ struct Inner<T> {
 struct Task(UnsafeCell<MaybeUninit<Waker>>);
 
 impl Task {
-    unsafe fn will_wake(&self, cx: &mut Context<'_>) -> bool {
+    unsafe fn will_wake(&self, cx: &mut Context<'_>) -> bool { unsafe {
         self.with_task(|w| w.will_wake(cx.waker()))
-    }
+    }}
 
     unsafe fn with_task<F, R>(&self, f: F) -> R
     where
         F: FnOnce(&Waker) -> R,
-    {
+    { unsafe {
         self.0.with(|ptr| {
             let waker: *const Waker = (*ptr).as_ptr();
             f(&*waker)
         })
-    }
+    }}
 
-    unsafe fn drop_task(&self) {
+    unsafe fn drop_task(&self) { unsafe {
         self.0.with_mut(|ptr| {
             let ptr: *mut Waker = (*ptr).as_mut_ptr();
             ptr.drop_in_place();
         });
-    }
+    }}
 
-    unsafe fn set_task(&self, cx: &mut Context<'_>) {
+    unsafe fn set_task(&self, cx: &mut Context<'_>) { unsafe {
         self.0.with_mut(|ptr| {
             let ptr: *mut Waker = (*ptr).as_mut_ptr();
             ptr.write(cx.waker().clone());
         });
-    }
+    }}
 }
 
 #[derive(Clone, Copy)]
@@ -1373,9 +1373,9 @@ impl<T> Inner<T> {
     /// sender *or* the receiver will call this method at a given point in time.
     /// If `VALUE_SENT` is not set, then only the sender may call this method;
     /// if it is set, then only the receiver may call this method.
-    unsafe fn consume_value(&self) -> Option<T> {
+    unsafe fn consume_value(&self) -> Option<T> { unsafe {
         self.value.with_mut(|ptr| (*ptr).take())
-    }
+    }}
 
     /// Returns true if there is a value. This function does not check `state`.
     ///
@@ -1386,9 +1386,9 @@ impl<T> Inner<T> {
     /// sender *or* the receiver will call this method at a given point in time.
     /// If `VALUE_SENT` is not set, then only the sender may call this method;
     /// if it is set, then only the receiver may call this method.
-    unsafe fn has_value(&self) -> bool {
+    unsafe fn has_value(&self) -> bool { unsafe {
         self.value.with(|ptr| (*ptr).is_some())
-    }
+    }}
 }
 
 unsafe impl<T: Send> Send for Inner<T> {}

@@ -149,7 +149,7 @@ impl<T> Block<T> {
     /// To maintain safety, the caller must ensure:
     ///
     /// * No concurrent access to the slot.
-    pub(crate) unsafe fn read(&self, slot_index: usize) -> Option<Read<T>> {
+    pub(crate) unsafe fn read(&self, slot_index: usize) -> Option<Read<T>> { unsafe {
         let offset = offset(slot_index);
 
         let ready_bits = self.header.ready_slots.load(Acquire);
@@ -166,7 +166,7 @@ impl<T> Block<T> {
         let value = self.values[offset].with(|ptr| ptr::read(ptr));
 
         Some(Read::Value(value.assume_init()))
-    }
+    }}
 
     /// Returns true if *this* block has a value in the given slot.
     ///
@@ -192,7 +192,7 @@ impl<T> Block<T> {
     ///
     /// * The slot is empty.
     /// * No concurrent access to the slot.
-    pub(crate) unsafe fn write(&self, slot_index: usize, value: T) {
+    pub(crate) unsafe fn write(&self, slot_index: usize, value: T) { unsafe {
         // Get the offset into the block
         let slot_offset = offset(slot_index);
 
@@ -204,7 +204,7 @@ impl<T> Block<T> {
         // be used. It is possible for the receiver to free the memory at
         // any point.
         self.set_ready(slot_offset);
-    }
+    }}
 
     /// Signal to the receiver that the sender half of the list is closed.
     pub(crate) unsafe fn tx_close(&self) {
@@ -241,7 +241,7 @@ impl<T> Block<T> {
     /// To maintain safety, the caller must ensure:
     ///
     /// * The block will no longer be accessed by any sender.
-    pub(crate) unsafe fn tx_release(&self, tail_position: usize) {
+    pub(crate) unsafe fn tx_release(&self, tail_position: usize) { unsafe {
         // Track the observed tail_position. Any sender targeting a greater
         // tail_position is guaranteed to not access this block.
         self.header
@@ -252,7 +252,7 @@ impl<T> Block<T> {
         // free the block's memory as soon as all slots **prior** to
         // `observed_tail_position` have been filled.
         self.header.ready_slots.fetch_or(RELEASED, Release);
-    }
+    }}
 
     /// Mark a slot as ready
     fn set_ready(&self, slot: usize) {
@@ -315,7 +315,7 @@ impl<T> Block<T> {
         block: &mut NonNull<Block<T>>,
         success: Ordering,
         failure: Ordering,
-    ) -> Result<(), NonNull<Block<T>>> {
+    ) -> Result<(), NonNull<Block<T>>> { unsafe {
         block.as_mut().header.start_index = self.header.start_index.wrapping_add(BLOCK_CAP);
 
         let next_ptr = self
@@ -328,7 +328,7 @@ impl<T> Block<T> {
             Some(next_ptr) => Err(next_ptr),
             None => Ok(()),
         }
-    }
+    }}
 
     /// Grows the `Block` linked list by allocating and appending a new block.
     ///

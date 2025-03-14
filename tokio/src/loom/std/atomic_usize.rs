@@ -25,9 +25,9 @@ impl AtomicUsize {
     ///
     /// All mutations must have happened before the unsynchronized load.
     /// Additionally, there must be no concurrent mutations.
-    pub(crate) unsafe fn unsync_load(&self) -> usize {
+    pub(crate) unsafe fn unsync_load(&self) -> usize { unsafe {
         core::ptr::read(self.inner.get() as *const usize)
-    }
+    }}
 
     pub(crate) fn with_mut<R>(&mut self, f: impl FnOnce(&mut usize) -> R) -> R {
         // safety: we have mutable access

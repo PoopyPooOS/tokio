@@ -173,7 +173,7 @@ feature! {
         ) -> Poll<io::Result<()>>
         where
             &'a E: io::Read + 'a,
-        {
+        { unsafe {
             use std::io::Read;
 
             loop {
@@ -231,7 +231,7 @@ feature! {
                     Err(e) => return Poll::Ready(Err(e)),
                 }
             }
-        }
+        }}
 
         pub(crate) fn poll_write<'a>(&'a self, cx: &mut Context<'_>, buf: &[u8]) -> Poll<io::Result<usize>>
         where

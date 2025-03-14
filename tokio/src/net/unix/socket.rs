@@ -258,10 +258,10 @@ impl AsFd for UnixSocket {
 }
 
 impl FromRawFd for UnixSocket {
-    unsafe fn from_raw_fd(fd: RawFd) -> UnixSocket {
+    unsafe fn from_raw_fd(fd: RawFd) -> UnixSocket { unsafe {
         let inner = socket2::Socket::from_raw_fd(fd);
         UnixSocket { inner }
-    }
+    }}
 }
 
 impl IntoRawFd for UnixSocket {

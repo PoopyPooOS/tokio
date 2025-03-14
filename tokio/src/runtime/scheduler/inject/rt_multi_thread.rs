@@ -30,7 +30,7 @@ impl<T: 'static> Shared<T> {
     where
         L: Lock<Synced>,
         I: Iterator<Item = task::Notified<T>>,
-    {
+    { unsafe {
         let first = match iter.next() {
             Some(first) => first.into_raw(),
             None => return,
@@ -48,7 +48,7 @@ impl<T: 'static> Shared<T> {
 
             // safety: Holding the Notified for a task guarantees exclusive
             // access to the `queue_next` field.
-            unsafe { prev.set_queue_next(Some(next)) };
+            prev.set_queue_next(Some(next));
             prev = next;
             counter += 1;
         });
@@ -56,7 +56,7 @@ impl<T: 'static> Shared<T> {
         // Now that the tasks are linked together, insert them into the
         // linked list.
         self.push_batch_inner(shared, first, prev, counter);
-    }
+    }}
 
     /// Inserts several tasks that have been linked together into the queue.
     ///
@@ -71,8 +71,8 @@ impl<T: 'static> Shared<T> {
         num: usize,
     ) where
         L: Lock<Synced>,
-    {
-        debug_assert!(unsafe { batch_tail.get_queue_next().is_none() });
+    { unsafe {
+        debug_assert!(batch_tail.get_queue_next().is_none());
 
         let mut synced = shared.lock();
 
@@ -84,7 +84,7 @@ impl<T: 'static> Shared<T> {
             while let Some(task) = curr {
                 curr = task.get_queue_next();
 
-                let _ = unsafe { task::Notified::<T>::from_raw(task) };
+                let _ = task::Notified::<T>::from_raw(task);
             }
 
             return;
@@ -93,9 +93,7 @@ impl<T: 'static> Shared<T> {
         let synced = synced.as_mut();
 
         if let Some(tail) = synced.tail {
-            unsafe {
-                tail.set_queue_next(Some(batch_head));
-            }
+            tail.set_queue_next(Some(batch_head));
         } else {
             synced.head = Some(batch_head);
         }
@@ -109,5 +107,5 @@ impl<T: 'static> Shared<T> {
         let len = self.len.unsync_load();
 
         self.len.store(len + num, Release);
-    }
+    }}
 }

@@ -370,9 +370,9 @@ impl<S: 'static> Task<S> {
         }
     }
 
-    unsafe fn from_raw(ptr: NonNull<Header>) -> Task<S> {
+    unsafe fn from_raw(ptr: NonNull<Header>) -> Task<S> { unsafe {
         Task::new(RawTask::from_raw(ptr))
-    }
+    }}
 
     #[cfg(all(
         tokio_unstable,
@@ -433,9 +433,9 @@ impl<S: 'static> Notified<S> {
 }
 
 impl<S: 'static> Notified<S> {
-    pub(crate) unsafe fn from_raw(ptr: RawTask) -> Notified<S> {
+    pub(crate) unsafe fn from_raw(ptr: RawTask) -> Notified<S> { unsafe {
         Notified(Task::new(ptr))
-    }
+    }}
 }
 
 impl<S: 'static> Notified<S> {
@@ -550,13 +550,13 @@ unsafe impl<S> linked_list::Link for Task<S> {
         handle.raw.header_ptr()
     }
 
-    unsafe fn from_raw(ptr: NonNull<Header>) -> Task<S> {
+    unsafe fn from_raw(ptr: NonNull<Header>) -> Task<S> { unsafe {
         Task::from_raw(ptr)
-    }
+    }}
 
-    unsafe fn pointers(target: NonNull<Header>) -> NonNull<linked_list::Pointers<Header>> {
+    unsafe fn pointers(target: NonNull<Header>) -> NonNull<linked_list::Pointers<Header>> { unsafe {
         self::core::Trailer::addr_of_owned(Header::get_trailer(target))
-    }
+    }}
 }
 
 /// # Safety

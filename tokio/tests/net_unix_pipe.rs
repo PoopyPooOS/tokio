@@ -477,7 +477,8 @@ async fn anon_pipe_spawn_echo() -> std::io::Result<()> {
 
     let (tx, mut rx) = pipe::pipe()?;
 
-    let status = Command::new("echo")
+    let command = Command::new("echo");
+    let status = command
         .arg("-n")
         .arg(DATA)
         .stdout(tx.into_blocking_fd()?)

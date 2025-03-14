@@ -119,13 +119,13 @@ impl Level {
         Some(slot)
     }
 
-    pub(crate) unsafe fn add_entry(&mut self, item: TimerHandle) {
+    pub(crate) unsafe fn add_entry(&mut self, item: TimerHandle) { unsafe {
         let slot = slot_for(item.cached_when(), self.level);
 
         self.slot[slot].push_front(item);
 
         self.occupied |= occupied_bit(slot);
-    }
+    }}
 
     pub(crate) unsafe fn remove_entry(&mut self, item: NonNull<TimerShared>) {
         let slot = slot_for(unsafe { item.as_ref().cached_when() }, self.level);

@@ -78,17 +78,17 @@ impl<L: ShardedListItem> ShardedList<L, L::Target> {
     /// - `node` is currently contained by `self`,
     /// - `node` is not contained by any list,
     /// - `node` is currently contained by some other `GuardedLinkedList`.
-    pub(crate) unsafe fn remove(&self, node: NonNull<L::Target>) -> Option<L::Handle> {
+    pub(crate) unsafe fn remove(&self, node: NonNull<L::Target>) -> Option<L::Handle> { unsafe {
         let id = L::get_shard_id(node);
         let mut lock = self.shard_inner(id);
         // SAFETY: Since the shard id cannot change, it's not possible for this node
         // to be in any other list of the same sharded list.
-        let node = unsafe { lock.remove(node) };
+        let node = lock.remove(node);
         if node.is_some() {
             self.count.decrement();
         }
         node
-    }
+    }}
 
     /// Gets the lock of `ShardedList`, makes us have the write permission.
     pub(crate) fn lock_shard(&self, val: &L::Handle) -> ShardGuard<'_, L, L::Target> {

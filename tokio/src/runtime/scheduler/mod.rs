@@ -166,13 +166,13 @@ cfg_rt! {
         where
             F: Future + 'static,
             F::Output: 'static,
-        {
+        { unsafe {
             if let Handle::CurrentThread(h) = self {
                 current_thread::Handle::spawn_local(h, future, id)
             } else {
                 panic!("Only current_thread and LocalSet have spawn_local internals implemented")
             }
-        }
+        }}
 
         pub(crate) fn shutdown(&self) {
             match *self {

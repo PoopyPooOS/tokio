@@ -1151,29 +1151,29 @@ impl task::Schedule for Arc<Shared> {
 }
 
 impl LocalState {
-    unsafe fn task_pop_front(&self) -> Option<task::Notified<Arc<Shared>>> {
+    unsafe fn task_pop_front(&self) -> Option<task::Notified<Arc<Shared>>> { unsafe {
         // The caller ensures it is called from the same thread that owns
         // the LocalSet.
         self.assert_called_from_owner_thread();
 
         self.local_queue.with_mut(|ptr| (*ptr).pop_front())
-    }
+    }}
 
-    unsafe fn task_push_back(&self, task: task::Notified<Arc<Shared>>) {
+    unsafe fn task_push_back(&self, task: task::Notified<Arc<Shared>>) { unsafe {
         // The caller ensures it is called from the same thread that owns
         // the LocalSet.
         self.assert_called_from_owner_thread();
 
         self.local_queue.with_mut(|ptr| (*ptr).push_back(task));
-    }
+    }}
 
-    unsafe fn take_local_queue(&self) -> VecDeque<task::Notified<Arc<Shared>>> {
+    unsafe fn take_local_queue(&self) -> VecDeque<task::Notified<Arc<Shared>>> { unsafe {
         // The caller ensures it is called from the same thread that owns
         // the LocalSet.
         self.assert_called_from_owner_thread();
 
         self.local_queue.with_mut(|ptr| std::mem::take(&mut (*ptr)))
-    }
+    }}
 
     unsafe fn task_remove(&self, task: &Task<Arc<Shared>>) -> Option<Task<Arc<Shared>>> {
         // The caller ensures it is called from the same thread that owns

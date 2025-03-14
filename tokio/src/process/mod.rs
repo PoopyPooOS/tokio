@@ -749,10 +749,10 @@ impl Command {
     pub unsafe fn pre_exec<F>(&mut self, f: F) -> &mut Command
     where
         F: FnMut() -> io::Result<()> + Send + Sync + 'static,
-    {
+    { unsafe {
         self.std.pre_exec(f);
         self
-    }
+    }}
 
     /// Sets the process group ID (PGID) of the child process. Equivalent to a
     /// `setpgid` call in the child process, but may be more efficient.

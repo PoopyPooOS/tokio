@@ -482,7 +482,7 @@ impl Handle {
     where
         F: crate::future::Future + 'static,
         F::Output: 'static,
-    {
+    { unsafe {
         let (handle, notified) = me.shared.owned.bind_local(future, me.clone(), id);
 
         me.task_hooks.spawn(&TaskMeta {
@@ -495,7 +495,7 @@ impl Handle {
         }
 
         handle
-    }
+    }}
 
     /// Capture a snapshot of this runtime's state.
     #[cfg(all(

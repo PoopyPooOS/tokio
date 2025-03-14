@@ -346,14 +346,14 @@ impl<T> IdleNotifiedSet<T> {
 ///
 /// The mutex for the entries must be held, and the target list must be such
 /// that setting `my_list` to `Neither` is ok.
-unsafe fn move_to_new_list<T>(from: &mut LinkedList<T>, to: &mut LinkedList<T>) {
+unsafe fn move_to_new_list<T>(from: &mut LinkedList<T>, to: &mut LinkedList<T>) { unsafe {
     while let Some(entry) = from.pop_back() {
         entry.my_list.with_mut(|ptr| {
             *ptr = List::Neither;
         });
         to.push_front(entry);
     }
-}
+}}
 
 impl<'a, T> EntryInOneOfTheLists<'a, T> {
     /// Remove this entry from the list it is in, returning the value associated
@@ -478,15 +478,15 @@ unsafe impl<T> linked_list::Link for ListEntry<T> {
         unsafe { NonNull::new_unchecked(ptr as *mut ListEntry<T>) }
     }
 
-    unsafe fn from_raw(ptr: NonNull<ListEntry<T>>) -> Arc<ListEntry<T>> {
+    unsafe fn from_raw(ptr: NonNull<ListEntry<T>>) -> Arc<ListEntry<T>> { unsafe {
         Arc::from_raw(ptr.as_ptr())
-    }
+    }}
 
     unsafe fn pointers(
         target: NonNull<ListEntry<T>>,
-    ) -> NonNull<linked_list::Pointers<ListEntry<T>>> {
+    ) -> NonNull<linked_list::Pointers<ListEntry<T>>> { unsafe {
         ListEntry::addr_of_pointers(target)
-    }
+    }}
 }
 
 #[cfg(all(test, not(loom)))]

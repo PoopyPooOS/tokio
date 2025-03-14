@@ -358,7 +358,7 @@ impl Handle {
     where
         F: Future + 'static,
         F::Output: 'static,
-    {
+    { unsafe {
         let id = crate::runtime::task::Id::next();
         #[cfg(all(
             tokio_unstable,
@@ -371,7 +371,7 @@ impl Handle {
         #[cfg(all(tokio_unstable, feature = "tracing"))]
         let future = crate::util::trace::task(future, "task", _meta, id.as_u64());
         self.inner.spawn_local(future, id)
-    }
+    }}
 
     /// Returns the flavor of the current `Runtime`.
     ///

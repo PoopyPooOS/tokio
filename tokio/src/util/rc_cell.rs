@@ -29,14 +29,14 @@ impl<T> RcCell<T> {
     unsafe fn with_inner<F, R>(&self, f: F) -> R
     where
         F: FnOnce(&mut Option<Rc<T>>) -> R,
-    {
+    { unsafe {
         // safety: This type is not Sync, so concurrent calls of this method
         // cannot happen. Furthermore, the caller guarantees that the method is
         // not called recursively. Finally, this is the only place that can
         // create mutable references to the inner Rc. This ensures that any
         // mutable references created here are exclusive.
         self.inner.with_mut(|ptr| f(&mut *ptr))
-    }
+    }}
 
     pub(crate) fn get(&self) -> Option<Rc<T>> {
         // safety: The `Rc::clone` method will not call any unknown user-code,

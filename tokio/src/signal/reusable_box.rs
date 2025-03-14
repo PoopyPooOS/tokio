@@ -79,7 +79,7 @@ impl<T> ReusableBoxFuture<T> {
     unsafe fn set_same_layout<F>(&mut self, future: F)
     where
         F: Future<Output = T> + Send + 'static,
-    {
+    { unsafe {
         // Drop the existing future, catching any panics.
         let result = panic::catch_unwind(AssertUnwindSafe(|| {
             ptr::drop_in_place(self.boxed.as_ptr());
@@ -101,7 +101,7 @@ impl<T> ReusableBoxFuture<T> {
                 panic::resume_unwind(payload);
             }
         }
-    }
+    }}
 
     /// Gets a pinned reference to the underlying future.
     pub(crate) fn get_pin(&mut self) -> Pin<&mut (dyn Future<Output = T> + Send)> {

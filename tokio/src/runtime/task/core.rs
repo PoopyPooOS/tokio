@@ -380,23 +380,23 @@ impl<T: Future, S: Schedule> Core<T, S> {
         })
     }
 
-    unsafe fn set_stage(&self, stage: Stage<T>) {
+    unsafe fn set_stage(&self, stage: Stage<T>) { unsafe {
         let _guard = TaskIdGuard::enter(self.task_id);
         self.stage.stage.with_mut(|ptr| *ptr = stage);
-    }
+    }}
 }
 
 impl Header {
-    pub(super) unsafe fn set_next(&self, next: Option<NonNull<Header>>) {
+    pub(super) unsafe fn set_next(&self, next: Option<NonNull<Header>>) { unsafe {
         self.queue_next.with_mut(|ptr| *ptr = next);
-    }
+    }}
 
     // safety: The caller must guarantee exclusive access to this field, and
     // must ensure that the id is either `None` or the id of the OwnedTasks
     // containing this task.
-    pub(super) unsafe fn set_owner_id(&self, owner: NonZeroU64) {
+    pub(super) unsafe fn set_owner_id(&self, owner: NonZeroU64) { unsafe {
         self.owner_id.with_mut(|ptr| *ptr = Some(owner));
-    }
+    }}
 
     pub(super) fn get_owner_id(&self) -> Option<NonZeroU64> {
         // safety: If there are concurrent writes, then that write has violated
@@ -409,11 +409,11 @@ impl Header {
     /// # Safety
     ///
     /// The provided raw pointer must point at the header of a task.
-    pub(super) unsafe fn get_trailer(me: NonNull<Header>) -> NonNull<Trailer> {
+    pub(super) unsafe fn get_trailer(me: NonNull<Header>) -> NonNull<Trailer> { unsafe {
         let offset = me.as_ref().vtable.trailer_offset;
         let trailer = me.as_ptr().cast::<u8>().add(offset).cast::<Trailer>();
         NonNull::new_unchecked(trailer)
-    }
+    }}
 
     /// Gets a pointer to the scheduler of the task containing this `Header`.
     ///
@@ -423,32 +423,32 @@ impl Header {
     ///
     /// The generic type S must be set to the correct scheduler type for this
     /// task.
-    pub(super) unsafe fn get_scheduler<S>(me: NonNull<Header>) -> NonNull<S> {
+    pub(super) unsafe fn get_scheduler<S>(me: NonNull<Header>) -> NonNull<S> { unsafe {
         let offset = me.as_ref().vtable.scheduler_offset;
         let scheduler = me.as_ptr().cast::<u8>().add(offset).cast::<S>();
         NonNull::new_unchecked(scheduler)
-    }
+    }}
 
     /// Gets a pointer to the id of the task containing this `Header`.
     ///
     /// # Safety
     ///
     /// The provided raw pointer must point at the header of a task.
-    pub(super) unsafe fn get_id_ptr(me: NonNull<Header>) -> NonNull<Id> {
+    pub(super) unsafe fn get_id_ptr(me: NonNull<Header>) -> NonNull<Id> { unsafe {
         let offset = me.as_ref().vtable.id_offset;
         let id = me.as_ptr().cast::<u8>().add(offset).cast::<Id>();
         NonNull::new_unchecked(id)
-    }
+    }}
 
     /// Gets the id of the task containing this `Header`.
     ///
     /// # Safety
     ///
     /// The provided raw pointer must point at the header of a task.
-    pub(super) unsafe fn get_id(me: NonNull<Header>) -> Id {
+    pub(super) unsafe fn get_id(me: NonNull<Header>) -> Id { unsafe {
         let ptr = Header::get_id_ptr(me).as_ptr();
         *ptr
-    }
+    }}
 
     /// Gets the tracing id of the task containing this `Header`.
     ///
@@ -470,16 +470,16 @@ impl Trailer {
         }
     }
 
-    pub(super) unsafe fn set_waker(&self, waker: Option<Waker>) {
+    pub(super) unsafe fn set_waker(&self, waker: Option<Waker>) { unsafe {
         self.waker.with_mut(|ptr| {
             *ptr = waker;
         });
-    }
+    }}
 
-    pub(super) unsafe fn will_wake(&self, waker: &Waker) -> bool {
+    pub(super) unsafe fn will_wake(&self, waker: &Waker) -> bool { unsafe {
         self.waker
             .with(|ptr| (*ptr).as_ref().unwrap().will_wake(waker))
-    }
+    }}
 
     pub(super) fn wake_join(&self) {
         self.waker.with(|ptr| match unsafe { &*ptr } {

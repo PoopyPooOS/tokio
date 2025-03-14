@@ -25,9 +25,9 @@ impl AtomicU16 {
     ///
     /// All mutations must have happened before the unsynchronized load.
     /// Additionally, there must be no concurrent mutations.
-    pub(crate) unsafe fn unsync_load(&self) -> u16 {
+    pub(crate) unsafe fn unsync_load(&self) -> u16 { unsafe {
         core::ptr::read(self.inner.get() as *const u16)
-    }
+    }}
 }
 
 impl Deref for AtomicU16 {

@@ -65,7 +65,7 @@ impl<T: 'static> Shared<T> {
     /// # Safety
     ///
     /// Must be called with the same `Synced` instance returned by `Inject::new`
-    pub(crate) unsafe fn push(&self, synced: &mut Synced, task: task::Notified<T>) {
+    pub(crate) unsafe fn push(&self, synced: &mut Synced, task: task::Notified<T>) { unsafe {
         if synced.is_closed {
             return;
         }
@@ -75,35 +75,35 @@ impl<T: 'static> Shared<T> {
         let task = task.into_raw();
 
         // The next pointer should already be null
-        debug_assert!(unsafe { task.get_queue_next().is_none() });
+        debug_assert!(task.get_queue_next().is_none());
 
         if let Some(tail) = synced.tail {
             // safety: Holding the Notified for a task guarantees exclusive
             // access to the `queue_next` field.
-            unsafe { tail.set_queue_next(Some(task)) };
+            tail.set_queue_next(Some(task));
         } else {
             synced.head = Some(task);
         }
 
         synced.tail = Some(task);
         self.len.store(len + 1, Release);
-    }
+    }}
 
     /// Pop a value from the queue.
     ///
     /// # Safety
     ///
     /// Must be called with the same `Synced` instance returned by `Inject::new`
-    pub(crate) unsafe fn pop(&self, synced: &mut Synced) -> Option<task::Notified<T>> {
+    pub(crate) unsafe fn pop(&self, synced: &mut Synced) -> Option<task::Notified<T>> { unsafe {
         self.pop_n(synced, 1).next()
-    }
+    }}
 
     /// Pop `n` values from the queue
     ///
     /// # Safety
     ///
     /// Must be called with the same `Synced` instance returned by `Inject::new`
-    pub(crate) unsafe fn pop_n<'a>(&'a self, synced: &'a mut Synced, n: usize) -> Pop<'a, T> {
+    pub(crate) unsafe fn pop_n<'a>(&'a self, synced: &'a mut Synced, n: usize) -> Pop<'a, T> { unsafe {
         use std::cmp;
 
         debug_assert!(n > 0);
@@ -117,5 +117,5 @@ impl<T: 'static> Shared<T> {
         self.len.store(len - n, Release);
 
         Pop::new(n, synced)
-    }
+    }}
 }

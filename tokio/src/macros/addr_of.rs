@@ -12,11 +12,11 @@ macro_rules! generate_addr_of_methods {
     ) => {
         impl<$($gen)*> $struct_name {$(
             $(#[$attrs])*
-            $vis unsafe fn $fn_name(me: ::core::ptr::NonNull<Self>) -> ::core::ptr::NonNull<$field_type> {
+            $vis unsafe fn $fn_name(me: ::core::ptr::NonNull<Self>) -> ::core::ptr::NonNull<$field_type> { unsafe {
                 let me = me.as_ptr();
                 let field = ::std::ptr::addr_of_mut!((*me) $(.$field_name)+ );
                 ::core::ptr::NonNull::new_unchecked(field)
-            }
+            }}
         )*}
     };
 }
